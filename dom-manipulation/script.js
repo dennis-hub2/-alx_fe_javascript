@@ -1,7 +1,12 @@
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [];
+let selectedCategory = localStorage.getItem('selectedCategory') || 'all';
 
 function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+function saveSelectedCategory(category) {
+  localStorage.setItem('selectedCategory', category);
 }
 
 function showRandomQuote() {
@@ -40,10 +45,14 @@ function populateCategories() {
     option.textContent = category;
     select.appendChild(option);
   });
+  select.value = selectedCategory;
 }
 
 function filterQuotes() {
   const category = document.getElementById('categoryFilter').value;
+  selectedCategory = category;
+  saveSelectedCategory(category);
+
   let filteredQuotes = quotes;
   if (category !== 'all') {
     filteredQuotes = quotes.filter(quote => quote.category === category);
@@ -79,7 +88,7 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
 document.addEventListener('DOMContentLoaded', () => {
   populateCategories();
-  showRandomQuote();
+  filterQuotes();
 });
 
 // Simulate periodic data fetching for server sync
