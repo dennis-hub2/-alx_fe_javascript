@@ -14,14 +14,14 @@ function showRandomQuote() {
   document.getElementById('quoteDisplay').innerText = `"${quote.text}" - ${quote.category}`;
 }
 
-function createAddQuoteForm() {
+function addQuote() {
   const quoteText = document.getElementById('newQuoteText').value;
   const quoteCategory = document.getElementById('newQuoteCategory').value;
   
   if (quoteText && quoteCategory) {
     quotes.push({ text: quoteText, category: quoteCategory });
     saveQuotes();
-    updateCategories();
+    populateCategories();
     document.getElementById('newQuoteText').value = '';
     document.getElementById('newQuoteCategory').value = '';
     showRandomQuote();
@@ -30,10 +30,7 @@ function createAddQuoteForm() {
   }
 }
 
-document.getElementById('newQuote').addEventListener('click', showRandomQuote);
-
-
-function updateCategories() {
+function populateCategories() {
   const categories = new Set(quotes.map(quote => quote.category));
   const select = document.getElementById('categoryFilter');
   select.innerHTML = '<option value="all">All Categories</option>';
@@ -54,13 +51,6 @@ function filterQuotes() {
   document.getElementById('quoteDisplay').innerHTML = filteredQuotes.map(quote => `"${quote.text}" - ${quote.category}`).join('<br>');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  updateCategories();
-  showRandomQuote();
-});
-
-
-
 function exportToJson() {
   const dataStr = JSON.stringify(quotes, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -72,21 +62,27 @@ function exportToJson() {
   URL.revokeObjectURL(url);
 }
 
-
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function(event) {
     const importedQuotes = JSON.parse(event.target.result);
     quotes = importedQuotes;
     saveQuotes();
-    updateCategories();
+    populateCategories();
     filterQuotes(); // or showRandomQuote if needed
     alert('Quotes imported successfully!');
   };
   fileReader.readAsText(event.target.files[0]);
 }
 
+document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
+document.addEventListener('DOMContentLoaded', () => {
+  populateCategories();
+  showRandomQuote();
+});
+
+// Simulate periodic data fetching for server sync
 function fetchFromServer() {
   // Simulating server fetch with a mock API or JSONPlaceholder
   // This should be replaced with actual API requests
@@ -94,12 +90,18 @@ function fetchFromServer() {
     .then(response => response.json())
     .then(data => {
       // Update quotes array with server data
-      quotes = data.map(item => ({ text: item.title, category: 'general' }));
-      saveQuotes();
-      updateCategories();
-      filterQuotes();
+      const serverQuotes = data.map(item => ({ text: item.title, category: 'general' }));
+      resolveConflicts(serverQuotes);
     });
 }
 
-// Simulate periodic data fetching
-setInterval(fetchFromServer, 60000); // every minute
+// Simple conflict resolution: server data takes precedence
+function resolveConflicts(serverQuotes) {
+  quotes = serverQuotes;
+  saveQuotes();
+  populateCategories();
+  filterQuotes();
+}
+
+// Simulate periodic data fetching every minute
+setInterval(fetchFromServer, 60000);
