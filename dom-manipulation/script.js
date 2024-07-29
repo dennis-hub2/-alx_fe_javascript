@@ -84,16 +84,15 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-function fetchQuotesFromServer() {
-  // Simulating server fetch with a mock API or JSONPlaceholder
-  // This should be replaced with actual API requests
-  fetch('https://jsonplaceholder.typicode.com/posts')
-    .then(response => response.json())
-    .then(data => {
-      // Update quotes array with server data
-      const serverQuotes = data.map(item => ({ text: item.title, category: 'general' }));
-      resolveConflicts(serverQuotes);
-    });
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const data = await response.json();
+    const serverQuotes = data.map(item => ({ text: item.title, category: 'general' }));
+    resolveConflicts(serverQuotes);
+  } catch (error) {
+    console.error('Error fetching quotes from server:', error);
+  }
 }
 
 function resolveConflicts(serverQuotes) {
