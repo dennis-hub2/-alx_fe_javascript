@@ -84,15 +84,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-document.getElementById('newQuote').addEventListener('click', showRandomQuote);
-
-document.addEventListener('DOMContentLoaded', () => {
-  populateCategories();
-  filterQuotes();
-});
-
-// Simulate periodic data fetching for server sync
-function fetchFromServer() {
+function fetchQuotesFromServer() {
   // Simulating server fetch with a mock API or JSONPlaceholder
   // This should be replaced with actual API requests
   fetch('https://jsonplaceholder.typicode.com/posts')
@@ -104,13 +96,21 @@ function fetchFromServer() {
     });
 }
 
-// Simple conflict resolution: server data takes precedence
 function resolveConflicts(serverQuotes) {
+  // Simple conflict resolution: server data takes precedence
   quotes = serverQuotes;
   saveQuotes();
   populateCategories();
   filterQuotes();
 }
 
+document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateCategories();
+  filterQuotes();
+  fetchQuotesFromServer(); // Fetch quotes from server on initial load
+});
+
 // Simulate periodic data fetching every minute
-setInterval(fetchFromServer, 60000);
+setInterval(fetchQuotesFromServer, 60000);
