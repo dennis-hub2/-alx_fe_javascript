@@ -124,7 +124,7 @@ function resolveConflicts(serverQuotes) {
   saveQuotes();
   populateCategories();
   filterQuotes();
-  notifyUser('Quotes have been synchronized with the server.');
+  notifyUser('Quotes synced with server!');
 }
 
 function syncQuotes() {
