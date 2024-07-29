@@ -22,14 +22,16 @@ function showRandomQuote() {
 function addQuote() {
   const quoteText = document.getElementById('newQuoteText').value;
   const quoteCategory = document.getElementById('newQuoteCategory').value;
-  
+
   if (quoteText && quoteCategory) {
-    quotes.push({ text: quoteText, category: quoteCategory });
+    const newQuote = { text: quoteText, category: quoteCategory };
+    quotes.push(newQuote);
     saveQuotes();
     populateCategories();
     document.getElementById('newQuoteText').value = '';
     document.getElementById('newQuoteCategory').value = '';
     showRandomQuote();
+    postQuoteToServer(newQuote);
   } else {
     alert('Please enter both quote text and category.');
   }
@@ -95,12 +97,48 @@ async function fetchQuotesFromServer() {
   }
 }
 
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(quote),
+    });
+    const data = await response.json();
+    console.log('Quote posted to server:', data);
+  } catch (error) {
+    console.error('Error posting quote to server:', error);
+  }
+}
+
 function resolveConflicts(serverQuotes) {
-  // Simple conflict resolution: server data takes precedence
-  quotes = serverQuotes;
+  const serverQuoteTexts = new Set(serverQuotes.map(q => q.text));
+  const localQuoteTexts = new Set(quotes.map(q => q.text));
+
+  const newQuotes = serverQuotes.filter(q => !localQuoteTexts.has(q.text));
+  const updatedQuotes = quotes.filter(q => !serverQuoteTexts.has(q.text));
+
+  quotes = [...newQuotes, ...updatedQuotes];
   saveQuotes();
   populateCategories();
   filterQuotes();
+  notifyUser('Quotes have been synchronized with the server.');
+}
+
+function syncQuotes() {
+  fetchQuotesFromServer();
+}
+
+function notifyUser(message) {
+  const notification = document.createElement('div');
+  notification.innerText = message;
+  notification.className = 'notification';
+  document.body.appendChild(notification);
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
@@ -112,4 +150,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Simulate periodic data fetching every minute
-setInterval(fetchQuotesFromServer, 60000);
+setInterval(syncQuotes, 60000);
