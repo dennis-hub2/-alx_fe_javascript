@@ -141,9 +141,26 @@ function notifyUser(message) {
   }, 3000);
 }
 
+function createAddQuoteForm() {
+  const formContainer = document.createElement('div');
+
+  formContainer.innerHTML = `
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button id="addQuoteButton">Add Quote</button>
+  `;
+
+  // Append the dynamically created form to the document
+  document.body.insertBefore(formContainer, document.getElementById('categoryFilter'));
+
+  // Add event listener for the Add Quote button
+  document.getElementById('addQuoteButton').addEventListener('click', addQuote);
+}
+
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
 document.addEventListener('DOMContentLoaded', () => {
+  createAddQuoteForm(); // Dynamically create the quote form
   populateCategories();
   filterQuotes();
   fetchQuotesFromServer(); // Fetch quotes from server on initial load
